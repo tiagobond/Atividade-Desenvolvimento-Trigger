@@ -1,0 +1,41 @@
+-- Criação da tabela de carros
+
+CREATE TABLE Carros (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    Marca VARCHAR(50),
+    Modelo VARCHAR(50),
+    Ano INT,
+    Cor VARCHAR(20),
+    NumeroChassi VARCHAR(17) UNIQUE,
+    Preco DECIMAL(10, 2),
+    NumPortas INT,
+    TipoCombustivel VARCHAR(20),
+    Quilometragem INT,
+    ProprietarioID INT,
+    FOREIGN KEY (ProprietarioID) REFERENCES Proprietarios(ID)
+);
+
+-- Criação da tabela de proprietários
+
+CREATE TABLE Proprietarios (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    Nome VARCHAR(100),
+    Endereco VARCHAR(200),
+    Telefone VARCHAR(15),
+    Email VARCHAR(100)
+);
+
+-- Trigger para atualizar a quilometragem total de um proprietário após a inserção de um novo carro
+
+DELIMITER $$
+CREATE TRIGGER update_quilometragem_total
+AFTER INSERT ON Carros
+FOR EACH ROW
+BEGIN
+    DECLARE total_km INT;
+    SELECT SUM(Quilometragem) INTO total_km FROM Carros WHERE ProprietarioID = NEW.ProprietarioID;
+    UPDATE Proprietarios SET QuilometragemTotal = total_km WHERE ID = NEW.ProprietarioID;
+END;
+
+$$
+DELIMITER;
